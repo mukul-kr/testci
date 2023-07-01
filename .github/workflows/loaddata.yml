@@ -5,6 +5,10 @@ on:
   schedule:
     - cron:  '0 1 * * *'
 
+env:
+  TESSDATA_PREFIX : /usr/share/tesseract-ocr/4.00/tessdata/
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,9 +35,7 @@ jobs:
         sudo chmod +x ~/Downloads/chromedriver && \
         sudo mv -f ~/Downloads/chromedriver /usr/local/share/chromedriver && \
         sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver && \
-        sudo wget -O /usr/share/tesseract-ocr/4.00/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata && \
-        export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/
-
+        sudo wget -O /usr/share/tesseract-ocr/4.00/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata 
 
     - name: Run Maven install
       run: mvn clean install
