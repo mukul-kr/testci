@@ -1,6 +1,7 @@
 name: CI Workflow
 
 on:
+  push:
   schedule:
     - cron:  '0 1 * * *'
 
