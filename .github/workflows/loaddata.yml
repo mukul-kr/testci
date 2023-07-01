@@ -6,7 +6,7 @@ on:
     - cron:  '0 1 * * *'
 
 env:
-  TESSDATA_PREFIX : /home/runner/Downloads
+  TESSDATA_PREFIX : /home/runner/tessdata
 
 
 jobs:
@@ -35,7 +35,8 @@ jobs:
         sudo chmod +x ~/Downloads/chromedriver && \
         sudo mv -f ~/Downloads/chromedriver /usr/local/share/chromedriver && \
         sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver && \
-        wget -O /home/runner/Downloads/eng.traineddata https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata 
+        mkdir -p /home/runner/tessdata && \
+        wget -O /home/runner/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/raw/master/eng.traineddata 
         echo $TESSDATA_PREFIX
         ls $TESSDATA_PREFIX
 
