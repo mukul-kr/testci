@@ -6,7 +6,7 @@ on:
     - cron:  '0 1 * * *'
 
 env:
-  TESSDATA_PREFIX : /home/runner/tessdata
+  TESSDATA_PREFIX : /usr/share/tesseract-ocr/4.00/tessdata/
 
 
 jobs:
@@ -36,9 +36,12 @@ jobs:
         sudo mv -f ~/Downloads/chromedriver /usr/local/share/chromedriver && \
         sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver && \
         mkdir -p /home/runner/tessdata && \
-        wget -O /home/runner/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata 
+        sudo wget -O /usr/share/tesseract-ocr/4.00/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata 
         echo $TESSDATA_PREFIX
         ls $TESSDATA_PREFIX
+        # wget -O /home/runner/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata 
+        # echo $TESSDATA_PREFIX
+        # ls $TESSDATA_PREFIX
 
     - name: Run Maven install
       run: mvn clean install
