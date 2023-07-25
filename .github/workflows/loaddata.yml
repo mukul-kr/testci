@@ -20,31 +20,43 @@ jobs:
         repository: atulnittcse/RnccSelenium
         token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
     
-    - name: Setup Java
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'adopt'
-        java-version: '11'
-      
-    - name: Setup Chrome, ChromeDriver and Tesseract
+    - name: Setup environment
       run: |
-        sudo apt-get update && \
-        sudo apt-get install -y wget unzip tesseract-ocr tesseract-ocr-eng && \
-        wget -N https://chromedriver.storage.googleapis.com/111.0.5563.64/chromedriver_linux64.zip -P ~/Downloads && \
-        unzip ~/Downloads/chromedriver_linux64.zip -d ~/Downloads && \
-        sudo chmod +x ~/Downloads/chromedriver && \
-        sudo mv -f ~/Downloads/chromedriver /usr/local/share/chromedriver && \
-        sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver && \
-        mkdir -p /home/runner/tessdata && \
-        sudo wget -O /usr/share/tesseract-ocr/4.00/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata 
-        echo $TESSDATA_PREFIX
-        ls $TESSDATA_PREFIX
-        # wget -O /home/runner/tessdata/eng.traineddata https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata 
-        # echo $TESSDATA_PREFIX
-        # ls $TESSDATA_PREFIX
+        sudo apt update
+        sudo apt install -y python3 python3-pip tesseract-ocr
 
-    - name: Run Maven install
-      run: mvn clean install
+        pip3 install selenium pytesseract pillow
 
-    - name: Run Maven compile and exec
-      run: mvn compile exec:java
+        mkdir -p $HOME/drivers
+        cd $HOME/drivers
+
+        wget https://chromedriver.storage.googleapis.com/94.0.4606.41/chromedriver_linux64.zip
+        unzip chromedriver_linux64.zip
+        chmod +x chromedriver
+
+        wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz
+        tar -xzf geckodriver-v0.33.0-linux64.tar.gz
+        chmod +x geckodriver
+
+        echo "$HOME/drivers" >> $GITHUB_PATH
+        
+    - name: Run pro.py
+      id: pro
+      continue-on-error: true
+      run: python pro.py
+
+    - name: Run sick.py
+      id: sick
+      continue-on-error: true
+      run: python sick.py
+
+    - name: Run newwarranty.py
+      id: newwarranty
+      continue-on-error: true
+      run: python newwarranty.py
+
+    - name: Check test result
+      run: |
+        if [ "${{ steps.pro.outcome }}" == "failure" ] || [ "${{ steps.sick.outcome }}" == "failure" ] || [ "${{ steps.newwarranty.outcome }}" == "failure" ]; then
+          exit 1
+        fi
