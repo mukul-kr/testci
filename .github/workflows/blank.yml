@@ -6,7 +6,7 @@ on:
 
 env:
   TESSDATA_PREFIX: /usr/share/tesseract-ocr/4.00/tessdata/
-  CHROMEDRIVER_VERSION: 115.0.5790.102
+  CHROMEDRIVER_VERSION: latest
 
 jobs:
   build:
