@@ -2,7 +2,11 @@ name: CI Workflow
 
 on:
   schedule:
-    - cron:  '0 1 * * *'
+    - cron: '0 1 * * *'
+
+env:
+  TESSDATA_PREFIX: /usr/share/tesseract-ocr/4.00/tessdata/
+  CHROMEDRIVER_VERSION: 115.0.5790.102
 
 jobs:
   build:
@@ -25,13 +29,25 @@ jobs:
       run: |
         sudo apt-get update && \
         sudo apt-get install -y wget unzip tesseract-ocr tesseract-ocr-eng && \
-        wget -N https://chromedriver.storage.googleapis.com/94.0.4606.61/chromedriver_linux64.zip -P ~/Downloads && \
+        wget -N "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" -P ~/Downloads && \
         unzip ~/Downloads/chromedriver_linux64.zip -d ~/Downloads && \
         sudo chmod +x ~/Downloads/chromedriver && \
         sudo mv -f ~/Downloads/chromedriver /usr/local/share/chromedriver && \
-        sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver && \
-        sudo ln -s /usr/local/share/chromedriver /usr/bin/chromedriver
-        export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/
+        sudo ln -sf /usr/local/share/chromedriver /usr/local/bin/chromedriver
+        
+    - name: Set ChromeDriver version
+      run: |
+        chromedriver --version
+        sudo ln -sf /usr/local/share/chromedriver /usr/bin/chromedriver
+        chromedriver --version
+      env:
+        CHROMEDRIVER_VERSION: ${{ env.CHROMEDRIVER_VERSION }}
+
+    - name: Set Tesseract environment variable
+      run: echo "TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/" | sudo tee -a /etc/environment
+      shell: bash
+      env:
+        TESSDATA_PREFIX: ${{ env.TESSDATA_PREFIX }}
 
     - name: Run Maven install
       run: mvn clean install
