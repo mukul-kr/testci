@@ -3,11 +3,11 @@ name: CI Workflow
 on:
   push:
   schedule:
-    - cron:  '0 1 * * *'
+    - cron: '0 1 * * *'
 
 env:
-  TESSDATA_PREFIX : /usr/share/tesseract-ocr/4.00/tessdata/
-
+  TESSDATA_PREFIX: /usr/share/tesseract-ocr/4.00/tessdata/
+  CHROMEDRIVER_VERSION: 115.0.5790.102
 
 jobs:
   build:
@@ -30,16 +30,18 @@ jobs:
         mkdir -p $HOME/drivers
         cd $HOME/drivers
 
-        wget https://chromedriver.storage.googleapis.com/94.0.4606.61/chromedriver_linux64.zip
+        # Download and set up ChromeDriver
+        wget "https://chromedriver.storage.googleapis.com/${{ env.CHROMEDRIVER_VERSION }}/chromedriver_linux64.zip"
         unzip chromedriver_linux64.zip
         chmod +x chromedriver
+        sudo mv chromedriver /usr/local/bin/
 
+        # Download and set up geckodriver (optional)
         wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz
         tar -xzf geckodriver-v0.33.0-linux64.tar.gz
         chmod +x geckodriver
+        sudo mv geckodriver /usr/local/bin/
 
-        echo "$HOME/drivers" >> $GITHUB_PATH
-        
     - name: Run pro.py
       id: pro
       continue-on-error: true
