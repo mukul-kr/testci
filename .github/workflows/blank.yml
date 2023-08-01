@@ -2,39 +2,39 @@ name: CI Workflow
 
 on:
   schedule:
-    - cron: '0 1 * * *'
+    - cron:  '0 1 * * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          repository: atulnittcse
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        repository: atulnittcse
+        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+    
+    - name: Setup Java
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+      
+    - name: Setup Chrome and ChromeDriver
+      run: |
+        sudo apt-get update && \
+        sudo apt-get install -y wget unzip tesseract-ocr tesseract-ocr-eng && \
+        wget -N https://chromedriver.storage.googleapis.com/111.0.5563.64/chromedriver_linux64.zip -P ~/Downloads && \
+        unzip ~/Downloads/chromedriver_linux64.zip -d ~/Downloads && \
+        sudo chmod +x ~/Downloads/chromedriver && \
+        sudo mv -f ~/Downloads/chromedriver /usr/local/share/chromedriver && \
+        sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver && \
+        sudo ln -s /usr/local/share/chromedriver /usr/bin/chromedriver
+        export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/
 
-      - name: Setup Java
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '11'
+    - name: Run Maven install
+      run: mvn clean install
 
-      - name: Setup Chrome and ChromeDriver
-        run: |
-          sudo apt-get update && \
-          sudo apt-get install -y wget unzip tesseract-ocr tesseract-ocr-eng && \
-          wget -N https://chromedriver.storage.googleapis.com/94.0.4606.61/chromedriver_linux64.zip -P ~/Downloads && \
-          unzip ~/Downloads/chromedriver_linux64.zip -d ~/Downloads && \
-          sudo chmod +x ~/Downloads/chromedriver && \
-          sudo mv -f ~/Downloads/chromedriver /usr/local/share/chromedriver && \
-          sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver && \
-          sudo ln -s /usr/local/share/chromedriver /usr/bin/chromedriver
-          export TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/
-
-      - name: Run Maven install
-        run: mvn clean install
-
-      - name: Run Maven compile and exec
-        run: mvn compile exec:java
+    - name: Run Maven compile and exec
+      run: mvn compile exec:java
