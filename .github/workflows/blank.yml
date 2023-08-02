@@ -1,6 +1,7 @@
-name: CI Workflow
+name: Selenium Test
 
 on:
+  push:
   schedule:
     - cron: '0 1 * * *'
 
@@ -13,44 +14,63 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        repository: atulnittcse
-        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-    
-    - name: Setup Java
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'adopt'
-        java-version: '11'
-      
-    - name: Setup Chrome and ChromeDriver
-      run: |
-        sudo apt-get update && \
-        sudo apt-get install -y wget unzip tesseract-ocr tesseract-ocr-eng && \
-        wget -N "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" -P ~/Downloads && \
-        unzip ~/Downloads/chromedriver_linux64.zip -d ~/Downloads && \
-        sudo chmod +x ~/Downloads/chromedriver && \
-        sudo mv -f ~/Downloads/chromedriver /usr/local/share/chromedriver && \
-        sudo ln -sf /usr/local/share/chromedriver /usr/local/bin/chromedriver
-        
-    - name: Set ChromeDriver version
-      run: |
-        chromedriver --version
-        sudo ln -sf /usr/local/share/chromedriver /usr/bin/chromedriver
-        chromedriver --version
-      env:
-        CHROMEDRIVER_VERSION: ${{ env.CHROMEDRIVER_VERSION }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          repository: atulnittcse/RnccSelenium
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
-    - name: Set Tesseract environment variable
-      run: echo "TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata/" | sudo tee -a /etc/environment
-      shell: bash
-      env:
-        TESSDATA_PREFIX: ${{ env.TESSDATA_PREFIX }}
+      - name: Setup environment
+        run: |
+          sudo apt update
+          sudo apt install -y python3 python3-pip tesseract-ocr
 
-    - name: Run Maven install
-      run: mvn clean install
+          pip3 install selenium pytesseract pillow
 
-    - name: Run Maven compile and exec
-      run: mvn compile exec:java
+          mkdir -p $HOME/drivers
+          cd $HOME/drivers
+
+          # Download and set up ChromeDriver
+          wget "https://chromedriver.storage.googleapis.com/${{ env.CHROMEDRIVER_VERSION }}/chromedriver_linux64.zip"
+          unzip chromedriver_linux64.zip
+          chmod +x chromedriver
+          sudo mv chromedriver /usr/local/bin/
+
+          # Download and set up geckodriver (optional)
+          wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz
+          tar -xzf geckodriver-v0.33.0-linux64.tar.gz
+          chmod +x geckodriver
+          sudo mv geckodriver /usr/local/bin/
+
+      - name: Run pro.py
+        id: pro
+        continue-on-error: true
+        run: python pro.py
+
+      - name: Run sick.py
+        id: sick
+        continue-on-error: true
+        run: python sick.py
+
+      - name: Run newwarranty.py
+        id: newwarranty
+        continue-on-error: true
+        run: python newwarranty.py
+
+      - name: Check test result
+        run: |
+          if [ "${{ steps.pro.outcome }}" == "failure" ] || [ "${{ steps.sick.outcome }}" == "failure" ] || [ "${{ steps.newwarranty.outcome }}" == "failure" ]; then
+            exit 1
+          fi
+
+      - name: Setup Java and Maven
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
+      - name: Run Maven install
+        run: mvn clean install
+
+      - name: Run Maven compile and exec
+        run: mvn compile exec:java
