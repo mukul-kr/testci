@@ -33,8 +33,8 @@ jobs:
         # Download and set up ChromeDriver
         wget "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/115.0.5790.170/linux64/chromedriver-linux64.zip"
         unzip chromedriver-linux64.zip
-        chmod +x chromedriver
-        sudo mv chromedriver /usr/local/bin/
+        chmod +x chromedriver-linux64/chromedriver
+        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
 
         # Download and set up geckodriver (optional)
         wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz
