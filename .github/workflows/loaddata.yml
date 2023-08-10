@@ -42,10 +42,10 @@ jobs:
         chmod +x geckodriver
         sudo mv geckodriver /usr/local/bin/
 
-    - name: Run pro.py
-      id: pro
-      continue-on-error: true
-      run: python pro.py
+#     - name: Run pro.py
+#       id: pro
+#       continue-on-error: true
+#       run: python pro.py
 
     - name: Run sick.py
       id: sick
