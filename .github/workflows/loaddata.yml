@@ -52,10 +52,10 @@ jobs:
       continue-on-error: true
       run: python sick.py
 
-    - name: Run newwarranty.py
-      id: newwarranty
-      continue-on-error: true
-      run: python newwarranty.py
+#     - name: Run newwarranty.py
+#       id: newwarranty
+#       continue-on-error: true
+#       run: python newwarranty.py
 
     - name: Check test result
       run: |
